@@ -1,8 +1,7 @@
-const puppeteer = require("puppeteer")
-
+const puppeteer = require("puppeteer");
 
 const webpage = async () => {
-  const browser = await puppeteer.launch({ headless: false});
+  const browser = await puppeteer.launch({ headless: false });
   const page = await browser.newPage();
 
   await page.goto("https://www.mercadolibre.com.co/");
@@ -14,22 +13,27 @@ const webpage = async () => {
   await input.type("Ropa de mujer");
   await page.click(".nav-search-btn");
 
-  await new Promise(r => setTimeout(r,30000))
+  // Espera unos segundos para que la página cargue completamente
+  await new Promise(r => setTimeout(r,10000))
 
   await page.waitForSelector('.ui-search-layout__item');
 
   const itemList = await page.$$eval('.ui-search-layout__item', elements => {
     return elements.map(el => {
-      const title = el.querySelector('.ui-search-item__title').textContent.trim();
-      const price = el.querySelector('.andes-money-amount').getAttribute('aria-label');
-      const imgSrc = el.querySelector('img').getAttribute('src'); // Obtener el src de la imagen
-      
+      const titleElement = el.querySelector('.ui-search-item__title');
+      const priceElement = el.querySelector('.andes-money-amount');
+      const imgElement = el.querySelector('img');
+
+      const title = titleElement ? titleElement.textContent.trim() : 'Título no encontrado';
+      const price = priceElement ? priceElement.getAttribute('aria-label') : 'Precio no encontrado';
+      const imgSrc = imgElement ? imgElement.getAttribute('src') : 'URL de imagen no encontrada';
+
       return { title, price, imgSrc };
     });
   });
-  
-  console.log(itemList)
-browser.close()
+
+  console.log(itemList);
+  await browser.close();
 };
 
 webpage();
